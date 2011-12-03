@@ -1,0 +1,23 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.davidparry.magnifying" android:versionCode="40"
+	android:versionName="3.1.48" android:installLocation="preferExternal">
+	<application android:icon="@drawable/icon" android:label="@string/app_name"
+		android:debuggable="true" android:theme="@style/CustomButton" >
+		<activity android:name=".MagnifierActivity" android:label="@string/app_name"
+			android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden|keyboard|navigation"
+			android:multiprocess="false" android:launchMode="singleInstance">
+			<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+		</activity>
+	
+	</application>
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-feature android:name="android.hardware.camera" android:required="true"/>
+	<uses-feature android:name="android.hardware.camera.autofocus"  android:required="true" />
+	<uses-feature android:name="android.hardware.camera." android:required="true" />
+	
+	<uses-sdk android:minSdkVersion="10" />
+	
+</manifest> 
