@@ -65,7 +65,7 @@ import com.davidparry.magnifying.Preview;
  */
 public class Zoomer {
 	private static final String tag = "Zoomer";
-
+	
 	public enum Choice {
 		DROIDX, Nexus_One, Droid, htc_legend, DEFAULT
 	}
@@ -127,8 +127,7 @@ public class Zoomer {
 			try {
 				preview.getCamera().setParameters(parameters);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//Log.e(tag, "Error in setting parameters", e);
 			}
 		}
 	}
@@ -149,6 +148,7 @@ public class Zoomer {
 		} else {
 			Log.e(tag, "Zoom not supported");
 		}
+		
 	}
 
 }
