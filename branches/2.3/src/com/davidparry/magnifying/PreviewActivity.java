@@ -59,8 +59,11 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
 import com.davidparry.magnifying.camera.Zoomer;
 
@@ -68,7 +71,7 @@ import com.davidparry.magnifying.camera.Zoomer;
  * @author david parry
  *
  */
-public class PreviewActivity extends SurfaceView implements
+public class PreviewActivity extends SurfaceView implements 
 		SurfaceHolder.Callback, Preview {
 	private static final String tag = "PreviewActivity";
 	SurfaceHolder mHolder;
@@ -268,5 +271,7 @@ public class PreviewActivity extends SurfaceView implements
 				+ ", zoomer=" + zoomer + ", activity=" + activity
 				+ ", surfacedCreated=" + surfacedCreated + "]";
 	}
-
+	
+	
+	
 }
