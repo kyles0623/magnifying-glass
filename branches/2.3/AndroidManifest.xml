@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.davidparry.magnifying" android:versionCode="41"
-	android:versionName="3.1.49" android:installLocation="preferExternal">
+	package="com.davidparry.magnifying" android:versionCode="42"
+	android:versionName="3.1.50" android:installLocation="preferExternal">
 	<application android:icon="@drawable/icon" android:label="@string/app_name"
 		android:debuggable="false" android:theme="@style/CustomButton" >
 		<activity android:name=".MagnifierActivity" android:label="@string/app_name"
@@ -18,6 +18,6 @@
 	<uses-feature android:name="android.hardware.camera.autofocus"  android:required="true" />
 	<uses-feature android:name="android.hardware.camera." android:required="true" />
 	
-	<uses-sdk android:minSdkVersion="9" />
+	<uses-sdk android:minSdkVersion="8" />
 	
 </manifest> 
