@@ -12,7 +12,12 @@
 		<TextView 
 			android:layout_height="wrap_content" android:layout_width="wrap_content"
 			android:layout_marginLeft="20dip" android:layout_marginRight="10dip"
-			android:text="" android:gravity="left"
+			android:text="Pinch to zoom in or zoom out. " android:gravity="left"
+			android:textAppearance="?android:attr/textAppearanceMedium"  android:textSize="12dip"/>
+		<TextView 
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_marginLeft="20dip" android:layout_marginRight="10dip"
+			android:text="Removed the old zoom button control." android:gravity="left"
 			android:textAppearance="?android:attr/textAppearanceMedium"  android:textSize="12dip"/>
 		
 		<TextView
@@ -25,7 +30,7 @@
 		<TextView 
 			android:layout_height="wrap_content" android:layout_width="wrap_content"
 			android:layout_marginLeft="20dip" android:layout_marginRight="10dip"
-			android:text="Did workaround for specific DROIDX only phone since the phone does not follow the api." android:gravity="left"
+			android:text="None" android:gravity="left"
 			android:textAppearance="?android:attr/textAppearanceMedium"  android:textSize="12dip"/>
 			<TextView 
 			android:layout_height="wrap_content" android:layout_width="wrap_content"

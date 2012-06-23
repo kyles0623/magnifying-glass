@@ -59,8 +59,11 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
 import com.davidparry.magnifying.camera.Zoomer;
 
@@ -68,11 +71,11 @@ import com.davidparry.magnifying.camera.Zoomer;
  * @author david parry
  *
  */
-public class PreviewActivity extends SurfaceView implements
+public class PreviewActivity extends SurfaceView implements 
 		SurfaceHolder.Callback, Preview {
 	private static final String tag = "PreviewActivity";
 	SurfaceHolder mHolder;
-	private Camera camera;
+	private static Camera camera;
 	private Zoomer zoomer;
 	private MagnifierActivity activity;
 	boolean surfacedCreated = false;
@@ -100,17 +103,28 @@ public class PreviewActivity extends SurfaceView implements
 		surfacedCreated = false;
 	}
 
+	public static Camera getCameraInstance(){
+	 	Camera c = null;
+	    try {
+	        c = Camera.open(); // attempt to get a Camera instance
+	    }
+	    catch (Exception e){
+	        // Camera is not available (in use or does not exist)
+	    }
+	    return c; // returns null if camera is unavailable
+	}
+	
 	private void initializeCamera(SurfaceHolder holder) {
 		try {
 			if (camera == null) {
-				camera = Camera.open();
+				camera = getCameraInstance();
 				try {
 					camera.setErrorCallback(new CameraErrorCallback(activity));
 				} catch (Exception e) {
 					Log.e(tag, "Error setting callback", e);
 				}
 				try {
-					setCameraParametersPreview();
+					//setCameraParametersPreview();
 					camera.setPreviewDisplay(holder);
 					camera.startPreview();
 					zoomer.zoom();
@@ -257,5 +271,7 @@ public class PreviewActivity extends SurfaceView implements
 				+ ", zoomer=" + zoomer + ", activity=" + activity
 				+ ", surfacedCreated=" + surfacedCreated + "]";
 	}
-
+	
+	
+	
 }

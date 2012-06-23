@@ -65,7 +65,7 @@ import com.davidparry.magnifying.Preview;
  */
 public class Zoomer {
 	private static final String tag = "Zoomer";
-
+	
 	public enum Choice {
 		DROIDX, Nexus_One, Droid, htc_legend, DEFAULT
 	}
@@ -119,18 +119,22 @@ public class Zoomer {
 
 	public void zoomCamera(int value) {
 		Parameters parameters = preview.getCamera().getParameters();
+		Log.d(tag, "ZOOM"+ preview.getCamera().getParameters().getZoom());
 		if (parameters.isSmoothZoomSupported()) {
 			preview.getCamera().startSmoothZoom(value);
 		} else if (parameters.isZoomSupported()) {
 			parameters.setZoom(value);
-			preview.getCamera().setParameters(parameters);
+			try {
+				preview.getCamera().setParameters(parameters);
+			} catch (Exception e) {
+				//Log.e(tag, "Error in setting parameters", e);
+			}
 		}
 	}
 
 	public void zoom() throws Exception {
 		Log.d(tag, "zoom()");
-		// Parameters parameters = preview.getCamera().getParameters();
-		// setZoom(getSpecificZoom(parameters.getMaxZoom()));
+		if(preview.getCamera().getParameters().isZoomSupported()) {
 		Parameters parameters = preview.getCamera().getParameters();
 		if (parameters.getMaxZoom() <= 0) {
 			String pictureZoom = parameters.get("taking-picture-zoom-max");
@@ -141,6 +145,10 @@ public class Zoomer {
 		} else {
 			zoomCamera(parameters.getMaxZoom());
 		}
+		} else {
+			Log.e(tag, "Zoom not supported");
+		}
+		
 	}
 
 }
