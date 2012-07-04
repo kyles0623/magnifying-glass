@@ -3,5 +3,9 @@
     
     <string name="app_name">Magnifying Glass</string>
     <string name="flash">Light</string>
-    
+     <string name="action_bar_focus">Focus</string>
+     <string name="action_bar_out">Zoom Out</string>
+        <string name="action_bar_in">Zoom In</string>
+    <string name="action_bar_freeze">Freeze</string>
+      <string name="action_bar_freeze_off">Freeze Off</string>
 </resources>
