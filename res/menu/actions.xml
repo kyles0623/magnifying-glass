@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+   
+      <item android:id="@+id/action_flash"
+          android:icon="@drawable/bulb"
+          android:showAsAction="ifRoom"
+          android:title="@string/flash" /> 
+          
+      <item android:id="@+id/action_focus"
+          android:icon="@android:drawable/ic_menu_view"
+          android:showAsAction="ifRoom"
+          android:title="@string/action_bar_focus" /> 
+    <item android:id="@+id/action_in"
+          android:icon="@drawable/ic_menu_zoom"
+          android:showAsAction="ifRoom"
+          android:title="@string/action_bar_in" />
+      
+      <item android:id="@+id/action_out"
+          android:icon="@drawable/ic_menu_out"
+          android:showAsAction="ifRoom"
+          android:title="@string/action_bar_out" />
+      
+        <item android:id="@+id/action_freeze"
+          android:icon="@android:drawable/ic_media_pause"
+          android:showAsAction="ifRoom"
+          android:title="@string/action_bar_freeze" />
+      
+      
+    
+</menu>
