@@ -3,9 +3,22 @@
     
     <string name="app_name">Magnifying Glass</string>
     <string name="flash">Light</string>
+     <string name="flash_off">Light Off</string>
      <string name="action_bar_focus">Focus</string>
      <string name="action_bar_out">Zoom Out</string>
         <string name="action_bar_in">Zoom In</string>
     <string name="action_bar_freeze">Freeze</string>
+        <string name="action_bar_mirror">Mirror</string>
+    <string name="action_bar_magnify">Magnify</string>
       <string name="action_bar_freeze_off">Freeze Off</string>
+      <string name="action_bar_help_me">Support Me</string>
+    <string name="alert_dialog_msg">Help me keep Magnifying Glass free by purchasing Kid Play Thank you.
+        If the application does not currently work on your phone then buying Kid Play will help me buy more phones to write custom code for the phones who\'s manufactures are not following the standard.
+        Kid Play is a guarded launcher that runs as an application and allows you to filter out the applications you do not want others to use.
+    </string>
+     <string name="alert_dialog_support">Yes Support</string>
+    <string name="alert_dialog_no">No Thanks</string>
+     <string name="alert_dialog_msg_header">Support Me Please</string>
+    
+   
 </resources>

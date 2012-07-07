@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,31 +25,40 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 public class Main extends Activity implements AutoFocusCallback {
 	public final static String tag = "Main";
 	private Preview mPreview;
 	Camera mCamera;
 	int numberOfCameras;
-	int cameraCurrentlyLocked;
+	public static int cameraCurrentlyLocked;
 	public static int zoomed = 0;
-	int defaultCameraId;
+	public static int defaultCameraId;
 	static public boolean focusing = false;
-
+	public boolean kidplaypresent = false;
+	int frontCameraId;	
+	boolean frontCameraPresent = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		mPreview = new Preview(this);
 		setContentView(mPreview);
 		numberOfCameras = Camera.getNumberOfCameras();
 		CameraInfo cameraInfo = new CameraInfo();
 		for (int i = 0; i < numberOfCameras; i++) {
 			Camera.getCameraInfo(i, cameraInfo);
-			if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+			if(cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
 				defaultCameraId = i;
+				cameraCurrentlyLocked = defaultCameraId;
+			} else if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+				frontCameraId = i;
+				frontCameraPresent = true;
 			}
 		}
+		kidplaypresent = checkForKidPlay();
+		
 	}
 
 	@Override
@@ -77,42 +91,106 @@ public class Main extends Activity implements AutoFocusCallback {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.actions, menu);
-		if(mCamera != null){
-			List<String> flashModes = mCamera.getParameters().getSupportedFlashModes();
-			boolean flag = true;
-			for(String mode : flashModes) {
-		      if(mode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_TORCH)){
-		    	  flag = false;
-		      }
-		    }
-			if(flag){
-				MenuItem mi = menu.findItem(R.id.action_flash);
-				mi.setVisible(false);
-			}
-		}
+		
 		return true;
 	}
 
+	@Override 
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if(kidplaypresent){
+			MenuItem mi = menu.findItem(R.id.action_help_me);
+			mi.setVisible(false);
+		}
+		if(mCamera != null){
+			MenuItem mif = menu.findItem(R.id.action_flash);
+			MenuItem mifr = menu.findItem(R.id.action_freeze);
+			MenuItem mi = menu.findItem(R.id.action_mirror);
+			CameraInfo cameraInfo = new CameraInfo();
+			Camera.getCameraInfo(Main.cameraCurrentlyLocked, cameraInfo);
+			if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+				mif.setVisible(false);
+				mif.setChecked(false);
+				mif.setTitle(R.string.flash);
+				mifr.setChecked(false);
+				mifr.setVisible(false);
+				mifr.setTitle(R.string.action_bar_freeze);
+				mi.setTitle(R.string.action_bar_magnify);
+			} else {
+				if(canFlash()){
+					mif.setVisible(true);
+				} else {
+					mif.setVisible(false);
+				}
+				mifr.setVisible(true);
+			}
+		}
+		if(!frontCameraPresent){
+			MenuItem mi = menu.findItem(R.id.action_mirror);
+			mi.setVisible(false);
+		}
+		return true;
+	};
+	
+	public boolean canFlash(){
+		boolean flag = false;
+		if(mCamera != null){
+			List<String> flashModes = mCamera.getParameters().getSupportedFlashModes();
+			for(String mode : flashModes) {
+		      if(mode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_TORCH)){
+		    	  flag = true;
+		      }
+		    }
+		}
+		return flag;
+	}
+	
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.action_flash: 
 			if (mCamera != null){
-		        if(item.isChecked()){
-		        	Camera.Parameters parameters = mCamera.getParameters();
-					parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-			        mCamera.setParameters(parameters);
-		        	item.setChecked(false);
-		        	item.setIcon(R.drawable.bulb);
-			    } else {
-		        	Camera.Parameters parameters = mCamera.getParameters();
-					parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-			        mCamera.setParameters(parameters);
-		        	item.setChecked(true);
-		        	item.setIcon(R.drawable.bulbon);
-		        }
+				if(canFlash()){
+			        if(item.isChecked()){
+			        	Camera.Parameters parameters = mCamera.getParameters();
+						parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+				        mCamera.setParameters(parameters);
+			        	item.setChecked(false);
+			        	item.setTitle(R.string.flash);
+			        	item.setIcon(R.drawable.bulb);
+				    } else {
+			        	Camera.Parameters parameters = mCamera.getParameters();
+						parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+				        mCamera.setParameters(parameters);
+			        	item.setChecked(true);
+			        	item.setIcon(R.drawable.bulbon);
+			        	item.setTitle(R.string.flash_off);
+			        }
+				} else {
+				   	item.setVisible(false);
+				}
 			}
 			break;
+			case R.id.action_help_me:
+				 new AlertDialog.Builder(Main.this)
+	                .setIconAttribute(android.R.attr.alertDialogIcon)
+	                .setTitle(R.string.alert_dialog_msg_header)
+	                .setMessage(R.string.alert_dialog_msg)
+	                .setPositiveButton(R.string.alert_dialog_support, new DialogInterface.OnClickListener() {
+	                    public void onClick(DialogInterface dialog, int whichButton) {
+	                    	Intent goToMarket = new Intent(Intent.ACTION_VIEW,Uri.parse("market://details?id=com.davidparry.kidplay"));
+	                    	goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+	                    	startActivity(goToMarket);
+	                    	Toast.makeText(((AlertDialog)dialog).getContext(), "Thank you for your support!", Toast.LENGTH_LONG).show();
+	                    }
+	                })
+	                .setNegativeButton(R.string.alert_dialog_no, new DialogInterface.OnClickListener() {
+	                    public void onClick(DialogInterface dialog, int whichButton) {
+
+	                    }
+	                })
+	                .create().show();
+				break;
 			case R.id.action_freeze:
 				if(!focusing){
 					if (mCamera != null) {
@@ -186,6 +264,31 @@ public class Main extends Activity implements AutoFocusCallback {
 					}
 				}
 				break;
+			case R.id.action_mirror:
+			    if (mCamera != null) {
+	                mCamera.stopPreview();
+	                mPreview.setCamera(null);
+	                mCamera.release();
+	                mCamera = null;
+	                
+	            }
+			    if(item.isChecked()){
+			    	item.setChecked(false);
+			    	item.setTitle(R.string.action_bar_mirror);
+		        	item.setIcon(R.drawable.mirror);
+			     	mCamera = Camera.open(defaultCameraId);
+			    	cameraCurrentlyLocked = defaultCameraId;
+			    } else {
+			    	mCamera = Camera.open(frontCameraId); 
+			      	item.setTitle(R.string.action_bar_magnify);
+			      	item.setIcon(R.drawable.magnify);
+			    	cameraCurrentlyLocked = frontCameraId;
+			    	item.setChecked(true);
+			    }
+	            mPreview.switchCamera(mCamera);
+	            // Start the preview
+	            mCamera.startPreview();
+				break;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -222,6 +325,21 @@ public class Main extends Activity implements AutoFocusCallback {
 		focusing = false;
 	}
 
+	 private boolean checkForKidPlay() {
+	        boolean flag = false;
+		 	Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+	        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+	        List<ResolveInfo> mApps = getPackageManager().queryIntentActivities(mainIntent, 0);
+	       for(ResolveInfo info : mApps){
+	    	   CharSequence label = info.activityInfo.loadLabel(getPackageManager());
+	    	   if("Kid Play".equalsIgnoreCase((String)label)){
+	    		   flag = true;
+	    	   }
+	       }
+	       return flag;
+	 }
+
+	
 }
 
 
@@ -233,7 +351,7 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 	Size mPreviewSize;
 	List<Size> mSupportedPreviewSizes;
 	Camera mCamera;
-
+	Size mFrontCameraPreviewSize;
 	Preview(Context context) {
 		super(context);
 		mSurfaceView = new SurfaceView(context);
@@ -260,7 +378,13 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 			Log.e(TAG, "IOException caused by setPreviewDisplay()", exception);
 		}
 		Camera.Parameters parameters = camera.getParameters();
-		parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+		CameraInfo cameraInfo = new CameraInfo();
+		Camera.getCameraInfo(Main.cameraCurrentlyLocked, cameraInfo);
+		if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
+			parameters.setPreviewSize(mFrontCameraPreviewSize.width, mFrontCameraPreviewSize.height);
+		} else {
+			parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+		}
 		requestLayout();
 
 		camera.setParameters(parameters);
@@ -353,6 +477,7 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 					minDiff = Math.abs(size.height - targetHeight);
 				}
 			}
+			mFrontCameraPreviewSize = optimalSize;
 			// set it to the first view dp
 			optimalSize = sizes.get(0);
 		}
