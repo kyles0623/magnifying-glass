@@ -39,7 +39,7 @@ public class Main extends Activity implements AutoFocusCallback {
 	public boolean kidplaypresent = false;
 	int frontCameraId;	
 	boolean frontCameraPresent = false;
-	
+	Menu _menu;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -91,12 +91,10 @@ public class Main extends Activity implements AutoFocusCallback {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.actions, menu);
-		
 		return true;
 	}
-
-	@Override 
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	
+	public void setMenuItems(Menu menu) {
 		if(kidplaypresent){
 			MenuItem mi = menu.findItem(R.id.action_help_me);
 			mi.setVisible(false);
@@ -128,6 +126,15 @@ public class Main extends Activity implements AutoFocusCallback {
 			MenuItem mi = menu.findItem(R.id.action_mirror);
 			mi.setVisible(false);
 		}
+	
+	}
+	
+	
+
+	@Override 
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		_menu = menu;
+		setMenuItems(menu);
 		return true;
 	};
 	
@@ -135,11 +142,13 @@ public class Main extends Activity implements AutoFocusCallback {
 		boolean flag = false;
 		if(mCamera != null){
 			List<String> flashModes = mCamera.getParameters().getSupportedFlashModes();
-			for(String mode : flashModes) {
-		      if(mode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_TORCH)){
-		    	  flag = true;
-		      }
-		    }
+			if(flashModes != null && flashModes.size() >0){
+				for(String mode : flashModes) {
+			      if(mode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_TORCH)){
+			    	  flag = true;
+			      }
+			    }
+			}
 		}
 		return flag;
 	}
@@ -151,23 +160,27 @@ public class Main extends Activity implements AutoFocusCallback {
 			case R.id.action_flash: 
 			if (mCamera != null){
 				if(canFlash()){
-			        if(item.isChecked()){
-			        	Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-				        mCamera.setParameters(parameters);
-			        	item.setChecked(false);
-			        	item.setTitle(R.string.flash);
-			        	item.setIcon(R.drawable.bulb);
-				    } else {
-			        	Camera.Parameters parameters = mCamera.getParameters();
-						parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-				        mCamera.setParameters(parameters);
-			        	item.setChecked(true);
-			        	item.setIcon(R.drawable.bulbon);
-			        	item.setTitle(R.string.flash_off);
-			        }
+					CameraInfo cameraInfo = new CameraInfo();
+					Camera.getCameraInfo(Main.cameraCurrentlyLocked, cameraInfo);
+					if(cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK){
+						if(item.isChecked()){
+				        	Camera.Parameters parameters = mCamera.getParameters();
+							parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+					        mCamera.setParameters(parameters);
+				        	item.setChecked(false);
+				        	item.setTitle(R.string.flash);
+				        	item.setIcon(R.drawable.bulb);
+					    } else {
+				        	Camera.Parameters parameters = mCamera.getParameters();
+							parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+					        mCamera.setParameters(parameters);
+				        	item.setChecked(true);
+				        	item.setIcon(R.drawable.bulbon);
+				        	item.setTitle(R.string.flash_off);
+				        }
+					}
 				} else {
-				   	item.setVisible(false);
+					Toast.makeText(this, "No flash option", Toast.LENGTH_SHORT).show();
 				}
 			}
 			break;
@@ -195,33 +208,52 @@ public class Main extends Activity implements AutoFocusCallback {
 				if(!focusing){
 					if (mCamera != null) {
 							try {
-								if(item.isChecked()){
-									item.setChecked(false);
-									item.setIcon(android.R.drawable.ic_media_pause);
-									item.setTitle(R.string.action_bar_freeze);
-									if (mCamera != null) {
-						                mCamera.stopPreview();
-						                mPreview.setCamera(null);
-						                mCamera.release();
-						                mCamera = null;
-						            }
-						            mCamera = Camera.open(cameraCurrentlyLocked);
-						            mPreview.switchCamera(mCamera);
-						            mCamera.startPreview();
-						            Camera.Parameters parameters = mCamera.getParameters();
-									parameters.setZoom(zoomed);
-									mCamera.setParameters(parameters);
-									mCamera.autoFocus(this);
-								} else {
-									item.setChecked(true);
-									mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
-									item.setIcon(android.R.drawable.ic_media_play);
-									item.setTitle(R.string.action_bar_freeze_off);
+								CameraInfo cameraInfo = new CameraInfo();
+								Camera.getCameraInfo(Main.cameraCurrentlyLocked, cameraInfo);
+								if(cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK){
+									if(item.isChecked()){
+										item.setChecked(false);
+										item.setIcon(android.R.drawable.ic_media_pause);
+										item.setTitle(R.string.action_bar_freeze);
+										if (mCamera != null) {
+							                mCamera.stopPreview();
+							                mPreview.setCamera(null);
+							                mCamera.release();
+							                mCamera = null;
+							            }
+							            mCamera = Camera.open(cameraCurrentlyLocked);
+							            mPreview.switchCamera(mCamera);
+							            mCamera.startPreview();
+							            Camera.Parameters parameters = mCamera.getParameters();
+										parameters.setZoom(zoomed);
+										mCamera.setParameters(parameters);
+										mCamera.autoFocus(this);
+									} else {
+										item.setChecked(true);
+										try{
+											Camera.Parameters parameters = mCamera.getParameters();
+											parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+									        mCamera.setParameters(parameters);
+										} catch (Exception er){
+											Log.e(tag, "Flash is not turning off", er);
+										}
+							
+										mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+										item.setIcon(android.R.drawable.ic_media_play);
+										item.setTitle(R.string.action_bar_freeze_off);
+							        	MenuItem flash = _menu.findItem(R.id.action_flash);
+							        	flash.setChecked(false);
+							        	flash.setTitle(R.string.flash);
+							        	flash.setIcon(R.drawable.bulb);
+									}
 								}
 							} catch (Exception e) {
 								Log.e(tag, "Error taking the picture ", e);
 							}
 					}
+				} else {
+					focusing = false;
+					zoomed = 0;
 				}
 				break;
 			case R.id.action_focus:
@@ -229,48 +261,63 @@ public class Main extends Activity implements AutoFocusCallback {
 					if (mCamera != null) {
 						focusing = true;
 						mCamera.autoFocus(this);
+					} else {
+						focusing = false;
 					}
 				}
 				break;
 			case R.id.action_in:
 				if(!focusing){
 					if (mCamera != null) {
+						Log.d(tag, "MaxZoom "+mCamera.getParameters().getMaxZoom() + "  zoomed = "+zoomed);
 						Camera.Parameters parameters = mCamera.getParameters();
-						zoomed = zoomed + 3;
-						int nzoom = zoomed;
-						if (nzoom <= mCamera.getParameters().getMaxZoom()) {
-							parameters.setZoom(nzoom);
-							mCamera.setParameters(parameters);
+						if(parameters.getMaxZoom() <= 0){
+							Toast.makeText(this, "No Zoom for this camera!", Toast.LENGTH_SHORT).show();
+						} else {
+							zoomed = zoomed + 3;
+							if (zoomed <= parameters.getMaxZoom()) {
+								parameters.setZoom(zoomed);
+								mCamera.setParameters(parameters);
+							}else{
+								zoomed = parameters.getMaxZoom();
+							}
 						}
 					}
+				} else {
+					focusing = false;
 				}
 				break;
 			case R.id.action_out:
 				if(!focusing){
 					if (mCamera != null) {
 						Camera.Parameters parameters = mCamera.getParameters();
-						zoomed = zoomed - 3;
-						if (zoomed >= 3) {
-							if(zoomed >30){
-								zoomed = 30;
-							}
-							parameters.setZoom(zoomed);
-							mCamera.setParameters(parameters);
+						if(parameters.getMaxZoom() <= 0){
+							Toast.makeText(this, "No Zoom for this camera!", Toast.LENGTH_SHORT).show();
 						} else {
-							zoomed = 0;
-							parameters.setZoom(zoomed);
-							mCamera.setParameters(parameters);
+							zoomed = zoomed - 3;
+							if (zoomed >= 3) {
+								if(zoomed >30){
+									zoomed = 30;
+								}
+								parameters.setZoom(zoomed);
+								mCamera.setParameters(parameters);
+							} else {
+								zoomed = 0;
+								parameters.setZoom(zoomed);
+								mCamera.setParameters(parameters);
+							}
 						}
 					}
+				} else {
+					focusing = false;
 				}
 				break;
 			case R.id.action_mirror:
-			    if (mCamera != null) {
+				if (mCamera != null) {
 	                mCamera.stopPreview();
 	                mPreview.setCamera(null);
 	                mCamera.release();
 	                mCamera = null;
-	                
 	            }
 			    if(item.isChecked()){
 			    	item.setChecked(false);
@@ -286,9 +333,9 @@ public class Main extends Activity implements AutoFocusCallback {
 			    	item.setChecked(true);
 			    }
 	            mPreview.switchCamera(mCamera);
-	            // Start the preview
 	            mCamera.startPreview();
-				break;
+	            zoomed = 0;
+	            break;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -305,6 +352,8 @@ public class Main extends Activity implements AutoFocusCallback {
 	PictureCallback rawCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			Log.d(tag, "onPictureTaken - raw");
+			
+			
 		}
 	};
 
