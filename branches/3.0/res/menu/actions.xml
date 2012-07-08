@@ -15,19 +15,19 @@
           android:title="@string/action_bar_focus" /> 
     <item android:id="@+id/action_flash"
           android:icon="@drawable/bulb"
-          android:showAsAction="ifRoom"
+          android:showAsAction="collapseActionView"
           android:title="@string/flash" /> 
      <item android:id="@+id/action_freeze"
           android:icon="@android:drawable/ic_media_pause"
-          android:showAsAction="ifRoom"
+          android:showAsAction="collapseActionView"
           android:title="@string/action_bar_freeze" />
  	<item android:id="@+id/action_mirror"
           android:icon="@drawable/mirror"
-          android:showAsAction="ifRoom"
+          android:showAsAction="collapseActionView"
           android:title="@string/action_bar_mirror" />
      <item android:id="@+id/action_help_me"
           android:icon="@drawable/helpme"
-          android:showAsAction="ifRoom"
+          android:showAsAction="collapseActionView"
           android:title="@string/action_bar_help_me" />
     
 </menu>
