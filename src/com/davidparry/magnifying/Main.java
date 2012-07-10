@@ -16,6 +16,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -153,6 +154,23 @@ public class Main extends Activity implements AutoFocusCallback {
 		return flag;
 	}
 	
+	public void reloadCamera() {
+		if (mCamera != null) {
+            mCamera.stopPreview();
+            mPreview.setCamera(null);
+            mCamera.release();
+            mCamera = null;
+        }
+        mCamera = Camera.open(cameraCurrentlyLocked);
+        mPreview.switchCamera(mCamera);
+        mCamera.startPreview();
+        Camera.Parameters parameters = mCamera.getParameters();
+		parameters.setZoom(zoomed);
+		mCamera.setParameters(parameters);
+		mCamera.autoFocus(this);
+	}
+	
+	
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -165,7 +183,11 @@ public class Main extends Activity implements AutoFocusCallback {
 					if(cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK){
 						if(item.isChecked()){
 				        	Camera.Parameters parameters = mCamera.getParameters();
-							parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+				        	if (Build.MANUFACTURER.equalsIgnoreCase("Samsung"))
+				            {
+				        		reloadCamera();
+				            }
+				        	parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
 					        mCamera.setParameters(parameters);
 				        	item.setChecked(false);
 				        	item.setTitle(R.string.flash);
@@ -215,29 +237,9 @@ public class Main extends Activity implements AutoFocusCallback {
 										item.setChecked(false);
 										item.setIcon(android.R.drawable.ic_media_pause);
 										item.setTitle(R.string.action_bar_freeze);
-										if (mCamera != null) {
-							                mCamera.stopPreview();
-							                mPreview.setCamera(null);
-							                mCamera.release();
-							                mCamera = null;
-							            }
-							            mCamera = Camera.open(cameraCurrentlyLocked);
-							            mPreview.switchCamera(mCamera);
-							            mCamera.startPreview();
-							            Camera.Parameters parameters = mCamera.getParameters();
-										parameters.setZoom(zoomed);
-										mCamera.setParameters(parameters);
-										mCamera.autoFocus(this);
+										reloadCamera();
 									} else {
 										item.setChecked(true);
-										try{
-											Camera.Parameters parameters = mCamera.getParameters();
-											parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-									        mCamera.setParameters(parameters);
-										} catch (Exception er){
-											Log.e(tag, "Flash is not turning off", er);
-										}
-							
 										mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
 										item.setIcon(android.R.drawable.ic_media_play);
 										item.setTitle(R.string.action_bar_freeze_off);
@@ -245,11 +247,24 @@ public class Main extends Activity implements AutoFocusCallback {
 							        	flash.setChecked(false);
 							        	flash.setTitle(R.string.flash);
 							        	flash.setIcon(R.drawable.bulb);
+							        	if (mCamera != null) {
+							                mCamera.stopPreview();
+							                mPreview.setCamera(null);
+							                mCamera.release();
+							                mCamera = null;
+							            }       	
 									}
 								}
 							} catch (Exception e) {
 								Log.e(tag, "Error taking the picture ", e);
 							}
+					} else {
+						if(item.isChecked()){
+							item.setChecked(false);
+							item.setIcon(android.R.drawable.ic_media_pause);
+							item.setTitle(R.string.action_bar_freeze);
+							reloadCamera();
+						}
 					}
 				} else {
 					focusing = false;
@@ -353,7 +368,6 @@ public class Main extends Activity implements AutoFocusCallback {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			Log.d(tag, "onPictureTaken - raw");
 			
-			
 		}
 	};
 
@@ -361,6 +375,15 @@ public class Main extends Activity implements AutoFocusCallback {
 	PictureCallback jpegCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			Log.d(tag, "onPictureTaken - jpeg");
+			/**
+			try{
+				Camera.Parameters parameters = mCamera.getParameters();
+				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+		        mCamera.setParameters(parameters);
+			} catch (Exception er){
+				Log.e(tag, "Flash is not turning off", er);
+			}
+			**/
 		}
 	};
 	
