@@ -404,8 +404,20 @@ public class Main extends Activity implements AutoFocusCallback {
 	        List<ResolveInfo> mApps = getPackageManager().queryIntentActivities(mainIntent, 0);
 	       for(ResolveInfo info : mApps){
 	    	   CharSequence label = info.activityInfo.loadLabel(getPackageManager());
-	    	   if("Kid Play".equalsIgnoreCase((String)label)){
-	    		   flag = true;
+	    	   try{
+		    	   if("Kid Play".equalsIgnoreCase((String)label)){
+		    		   flag = true;
+		    	   }
+	    	   } catch(Exception er) {
+	    		   try{
+	    			   android.text.SpannedString st = (android.text.SpannedString)label;
+	    			   String sp = st.toString();
+	    			   if("Kid Play".equalsIgnoreCase(sp)){
+			    		   flag = true;
+			    	   }
+	    		   } catch(Exception e){
+	    			   
+	    		   }
 	    	   }
 	       }
 	       return flag;
@@ -457,9 +469,14 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 		} else {
 			parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
 		}
+		try{
+			camera.setParameters(parameters);
+		} catch(Exception er){
+			throw new DebugException("SwitchCamera is "+ camera + " parameters "+ parameters.flatten(),er);
+		}
 		requestLayout();
-
-		camera.setParameters(parameters);
+		
+	
 	}
 
 	@Override
@@ -549,10 +566,11 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 					minDiff = Math.abs(size.height - targetHeight);
 				}
 			}
-			mFrontCameraPreviewSize = optimalSize;
-			// set it to the first view dp
-			optimalSize = sizes.get(0);
 		}
+		mFrontCameraPreviewSize = optimalSize;
+		// set it to the first view dp
+		optimalSize = sizes.get(0);
+
 		return optimalSize;
 	}
 
