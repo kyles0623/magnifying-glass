@@ -333,7 +333,8 @@ public class Main extends Activity implements AutoFocusCallback {
 	                mPreview.setCamera(null);
 	                mCamera.release();
 	                mCamera = null;
-	            }
+	                focusing = false;
+				}
 			    if(item.isChecked()){
 			    	item.setChecked(false);
 			    	item.setTitle(R.string.action_bar_mirror);
@@ -341,11 +342,15 @@ public class Main extends Activity implements AutoFocusCallback {
 			     	mCamera = Camera.open(defaultCameraId);
 			    	cameraCurrentlyLocked = defaultCameraId;
 			    } else {
-			    	mCamera = Camera.open(frontCameraId); 
-			      	item.setTitle(R.string.action_bar_magnify);
-			      	item.setIcon(R.drawable.magnify);
-			    	cameraCurrentlyLocked = frontCameraId;
-			    	item.setChecked(true);
+			    	try{
+				    	mCamera = Camera.open(frontCameraId); 
+				      	item.setTitle(R.string.action_bar_magnify);
+				      	item.setIcon(R.drawable.magnify);
+				    	cameraCurrentlyLocked = frontCameraId;
+				    	item.setChecked(true);
+			    	} catch(Exception e) {
+			    		Toast.makeText(this, "Your front camera is locked by another application sorry try again soon", Toast.LENGTH_SHORT).show();
+			    	}
 			    }
 	            mPreview.switchCamera(mCamera);
 	            mCamera.startPreview();
