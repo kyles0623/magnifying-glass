@@ -167,7 +167,11 @@ public class Main extends Activity implements AutoFocusCallback {
         Camera.Parameters parameters = mCamera.getParameters();
 		parameters.setZoom(zoomed);
 		mCamera.setParameters(parameters);
-		mCamera.autoFocus(this);
+		try {
+			mCamera.autoFocus(this);
+		} catch (Exception e) {
+			Log.e(tag, "Error auto focusing",e);
+		}
 	}
 	
 	
@@ -470,9 +474,10 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback,AutoFocusCallb
 		CameraInfo cameraInfo = new CameraInfo();
 		Camera.getCameraInfo(Main.cameraCurrentlyLocked, cameraInfo);
 		if(cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT){
-			parameters.setPreviewSize(mFrontCameraPreviewSize.width, mFrontCameraPreviewSize.height);
+		//	parameters.setPreviewSize(mFrontCameraPreviewSize.width, mFrontCameraPreviewSize.height);
+		//	parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
 		} else {
-			parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+		//	parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
 		}
 		try{
 			camera.setParameters(parameters);
